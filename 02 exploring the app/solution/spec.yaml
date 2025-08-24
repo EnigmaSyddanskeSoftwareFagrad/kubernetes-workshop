@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: counter-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: counter-app
+  template:
+    metadata:
+      labels:
+        app: counter-app
+    spec:
+      containers:
+        - name: counter-app
+          image: othelloengineer/counter-app
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: counter
+              mountPath: /app/data
+        - name: volume-monitor
+          image: ubuntu
+          command: ["/bin/sleep"]
+          args: ["infinity"]
+          volumeMounts:
+            - name: counter
+              mountPath: /dirs-to-monitor
+      volumes:
+        - name: counter
+          emptyDir: {}

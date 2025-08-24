@@ -1,0 +1,25 @@
+## Docker is only accessible from root
+
+## Docker containers cannot find discovery.talos.dev
+in /etc/docker/daemon.json
+{
+  "dns": ["8.8.8.8", "1.1.1.1"]
+}
+sudo systemctl restart docker
+
+## Netfilter module is not loaded
+sudo modprobe br_netfilter
+sudo sysctl net.bridge.bridge-nf-call-iptables=1
+sudo sysctl net.ipv4.ip_forward=1
+echo br_netfilter | sudo tee /etc/modules-load.d/k8s.conf
+
+cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+net.ipv4.ip_forward                 = 1
+EOF
+
+sudo sysctl --system
+
+
+#
