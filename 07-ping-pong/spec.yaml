@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ping-pong-svc
+  labels:
+    app: ping-pong
+spec:
+  ports:
+    - port: 8080
+      name: web
+  clusterIP: None
+  selector:
+    app: ping-pong
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ping-pong-app
+spec:
+  serviceName: "ping-pong-svc"
+  replicas: 4
+  selector:
+    matchLabels:
+      app: ping-pong
+  template:
+    metadata:
+      labels:
+        app: ping-pong
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: ping-pong-container
+          image: othelloengineer/ping-pong-state
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              name: web
+          env:
+            - name: SERVICE_NAME
+              value: "ping-pong-svc"
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
